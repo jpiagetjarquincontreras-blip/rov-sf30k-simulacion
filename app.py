@@ -7,6 +7,19 @@ st.set_page_config(page_title="Simulador y Teoría - ROV SF30k", layout="wide")
 st.title("⚓ Simulador Dinámico y Análisis Teórico - ROV SF30k")
 st.markdown("Herramienta interactiva y guía teórica basada en la tesis de Viktor Berg (2012) para Dinámica del Buque.")
 
+# --- Menú Lateral (Sidebar) para Parámetros y Controles ---
+st.sidebar.header("🎛️ Panel de Control y Parámetros")
+st.sidebar.markdown("Modifica el empuje de los propulsores para observar el cambio en las gráficas y valores finales.")
+
+# Control deslizante para el empuje
+thrust_input = st.sidebar.slider("Empuje de Propulsores ($T$ en N)", 500.0, 3000.0, 1200.0, 100.0)
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("📌 Condiciones Fijas Evaluadas")
+st.sidebar.text("• Corriente 1: 0.0 m/s (Sin corriente)")
+st.sidebar.text("• Corriente 2: 0.5 m/s (Moderada)")
+st.sidebar.text("• Corriente 3: 1.2 m/s (Fuerte)")
+
 # --- Creación de pestañas ---
 tab_sim, tab_teo = st.tabs(["🚀 Simulador Interactivo", "📚 Guía Teórica y Explicativa"])
 
@@ -45,18 +58,17 @@ with tab_sim:
 
     st.markdown("---")
 
-    st.subheader("🌊 2. Simulación Temporal: Comparativa ante Corrientes Marinas")
-    st.markdown("Evaluación del comportamiento del ROV ante tres velocidades de corriente distintas ($0.0\\text{ m/s}$, $0.5\\text{ m/s}$ y $1.2\\text{ m/s}$)[cite: 1].")
+    st.subheader("🌊 2. Simulación Temporal: Comparativa y Valores Clave")
+    st.markdown("Resultados numéricos exactos y comportamiento gráfico ante las tres corrientes de la tarea[cite: 1].")
 
     m_total = 3000.0 
     d_lin = 400.0
     d_quad = 350.0
-    thrust = 1200.0
 
     time = np.linspace(0, 50, 250)
     dt = time[1] - time[0]
 
-    def simulate_rov(v_c):
+    def simulate_rov(v_c, thrust_val):
         u_rel = np.zeros_like(time)
         x_pos = np.zeros_like(time)
         curr_u_rel = 0.0
@@ -64,7 +76,7 @@ with tab_sim:
         
         for i in range(1, len(time)):
             drag = (d_lin * curr_u_rel) + (d_quad * curr_u_rel * abs(curr_u_rel))
-            accel = (thrust - drag) / m_total
+            accel = (thrust_val - drag) / m_total
             curr_u_rel += accel * dt
             u_ground = curr_u_rel - v_c  
             curr_x += u_ground * dt
@@ -73,10 +85,19 @@ with tab_sim:
             x_pos[i] = curr_x
         return x_pos, u_rel
 
+    # Evaluamos las 3 corrientes usando el empuje configurado en el panel lateral
     v1, v2, v3 = 0.0, 0.5, 1.2
-    x1, u1 = simulate_rov(v1)
-    x2, u2 = simulate_rov(v2)
-    x3, u3 = simulate_rov(v3)
+    x1, u1 = simulate_rov(v1, thrust_input)
+    x2, u2 = simulate_rov(v2, thrust_input)
+    x3, u3 = simulate_rov(v3, thrust_input)
+
+    # Tarjetas con valores numéricos exactos (Métricas)
+    col_met1, col_met2, col_met3 = st.columns(3)
+    col_met1.metric("Posición Final (0.0 m/s)", f"{x1[-1]:.2f} m", f"Vel: {u1[-1]:.2f} m/s")
+    col_met2.metric("Posición Final (0.5 m/s)", f"{x2[-1]:.2f} m", f"Vel: {u2[-1]:.2f} m/s")
+    col_met3.metric("Posición Final (1.2 m/s)", f"{x3[-1]:.2f} m", f"Vel: {u3[-1]:.2f} m/s")
+
+    st.markdown("---")
 
     col_g1, col_g2 = st.columns(2)
 
