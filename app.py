@@ -5,39 +5,40 @@ import plotly.graph_objects as go
 st.set_page_config(page_title="Simulación ROV SF30k - Berg (2012)", layout="wide")
 
 st.title("⚓ Simulador Dinámico del ROV SF30k")
-st.markdown("Análisis dinámico, sistemas de referencia y comparativa de corrientes marinas (Basado en V. Berg, 2012).")
+st.markdown("Análisis dinámico, sistemas de referencia y comparativa de corrientes marinas (Basado en V. Berg, 2012)[cite: 1].")
 
-# --- Sección 1: Visualización de Matrices del Modelo (.mux) ---
+# --- Sección 1: Visualización de Matrices en Formato Matemático (LaTeX) ---
 st.subheader("📊 1. Matrices del Modelo Dinámico (6 DoF)")
-st.write("A continuación se presentan las matrices principales extraídas del código base de la tesis (Masa Rígida, Masa Añadida y Amortiguamiento):")
+st.write("A continuación se presentan las matrices principales expresadas en notación matricial formal:")
 
 col_m1, col_m2 = st.columns(2)
 
 with col_m1:
     st.markdown("**Matriz de Masa Total ($M = M_{RB} + M_A$) [kg / kg·m]**")
-    # Matriz 6x6 representativa de masa y inercia acoplada
-    mass_matrix = np.array([
-        [3000.0,    0.0,    0.0,    0.0,    0.0,    0.0],
-        [   0.0, 3000.0,    0.0,    0.0,    0.0,  150.0],
-        [   0.0,    0.0, 3000.0,    0.0, -150.0,    0.0],
-        [   0.0,    0.0,    0.0,   500.0,   0.0,    0.0],
-        [   0.0,    0.0, -150.0,   0.0,   600.0,    0.0],
-        [   0.0,  150.0,    0.0,    0.0,    0.0,   600.0]
-    ])
-    st.dataframe(mass_matrix, use_container_width=True)
+    st.latex(r"""
+    M = \begin{bmatrix}
+    3000 & 0 & 0 & 0 & 0 & 0 \\
+    0 & 3000 & 0 & 0 & 0 & 150 \\
+    0 & 0 & 3000 & 0 & -150 & 0 \\
+    0 & 0 & 0 & 500 & 0 & 0 \\
+    0 & 0 & -150 & 0 & 600 & 0 \\
+    0 & 150 & 0 & 0 & 0 & 600
+    \end{bmatrix}
+    """)
     st.caption("Nota: Distingue los componentes de translación (filas/cols 1-3) y rotación (4-6).")
 
 with col_m2:
     st.markdown("**Matriz de Amortiguamiento Líneo-Cuadrático ($D$) [Dumping.mux]**")
-    damping_matrix = np.array([
-        [400.0,   0.0,   0.0,   0.0,   0.0,   0.0],
-        [  0.0, 450.0,   0.0,   0.0,   0.0,   0.0],
-        [  0.0,   0.0, 500.0,   0.0,   0.0,   0.0],
-        [  0.0,   0.0,   0.0, 100.0,   0.0,   0.0],
-        [  0.0,   0.0,   0.0,   0.0, 120.0,   0.0],
-        [  0.0,   0.0,   0.0,   0.0,   0.0, 120.0]
-    ])
-    st.dataframe(damping_matrix, use_container_width=True)
+    st.latex(r"""
+    D = \begin{bmatrix}
+    400 & 0 & 0 & 0 & 0 & 0 \\
+    0 & 450 & 0 & 0 & 0 & 0 \\
+    0 & 0 & 500 & 0 & 0 & 0 \\
+    0 & 0 & 0 & 100 & 0 & 0 \\
+    0 & 0 & 0 & 0 & 120 & 0 \\
+    0 & 0 & 0 & 0 & 0 & 120
+    \end{bmatrix}
+    """)
     st.caption("Incluye los coeficientes de amortiguamiento lineal y no lineal del vehículo.")
 
 st.markdown("---")
